@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # API Service for stream management
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - GO2RTC_API=http://go2rtc:1984
+      - NGINX_PORT=8080
+      - IP=host.docker.internal
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./api:/app
+      - ./temp:/temp  # Windows-compatible temp directory
+    depends_on:
+      - go2rtc
+      - nginx
+      - redis
+    restart: unless-stopped
+    networks:
+      - movie-mini-network
+
+  # Detection worker for YOLO processing
+  detection-worker:
+    build:
+      context: ./detection
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - GO2RTC_API=http://go2rtc:1984
+    volumes:
+      - ./detection:/app
+      - ./temp:/temp
+    depends_on:
+      - redis
+      - go2rtc
+    restart: unless-stopped
+    networks:
+      - movie-mini-network
+
+  # Redis for task queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - movie-mini-network
+
+  # go2rtc for stream conversion
+  go2rtc:
+    image: alexxit/go2rtc:latest
+    ports:
+      - "1984:1984"
+      - "8554:8554"
+    volumes:
+      - ./go2rtc/go2rtc.yaml:/config/go2rtc.yaml
+    restart: unless-stopped
+    networks:
+      - movie-mini-network
+
+  # NGINX for serving streams
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/html:/usr/share/nginx/html
+    depends_on:
+      - go2rtc
+    restart: unless-stopped
+    networks:
+      - movie-mini-network
+
+networks:
+  movie-mini-network:
+    driver: bridge

@@ -1,0 +1,23 @@
+api:
+    base_path: ""
+    listen: :1984
+    origin: '*'
+    static_dir: ""
+hls:
+    listen: :8888
+    origin: '*'
+log:
+    level: info
+rtmp:
+    listen: :1935
+rtsp:
+    default_query: mp4
+    listen: :8554
+streams:
+    cam001: rtsp://admin:UNV123456%23@192.168.21.43:554/ch01
+    cam002: rtsp://admin:UNV123456%23@192.168.21.43:554/ch01
+webrtc:
+    candidates:
+        - host.docker.internal
+        - stun:stun.l.google.com:19302
+    listen: :8555

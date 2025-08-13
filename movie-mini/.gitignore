@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Docker
+.env
+
+# Logs
+*.log
+logs/
+
+# Temp files
+temp/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# YOLO models (will be downloaded automatically)
+*.pt
+!yolov8n.pt
+
+# Redis data
+dump.rdb
